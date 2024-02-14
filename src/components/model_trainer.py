@@ -19,8 +19,9 @@ from sklearn.linear_model import LinearRegression
 import pickle
 from src.exception import CustomException
 from src.logger import logging
-from src.components.data_transformation import DataTransformationConfig,DataTransformation
-from src.components.data_ingestion import DataIngestionConfig,DataIngestion
+import pandas as pd
+from src.utils import save_obj
+from sklearn.metrics import r2_score
 
 
 @dataclass
@@ -33,14 +34,13 @@ class ModelTrain:
     def __init__(self):
         self.model_trainer_config=ModelTrainerConfig()
         
-        
-        
-    def train(self,train_data):
+    def initiate_model_trainer(self,train_arr,test_arr,preprocessor_file_path):
         try:
-            target_column='math_score'
-        
-            X_train=train_data.drop(columns=[target_column],axis=1)
-            y_train=train_data[target_column]
+            logging.info("get train and tes data")
+            X_train,y_train,X_test,y_test=(
+            train_arr[:,:-1],train_arr[:,-1],test_arr[:,:-1],test_arr[:,-1]          
+            
+            )
             LR=LinearRegression()
             LR.fit(X_train,y_train)
             logging.info("LR model has been trained successfully")
@@ -52,22 +52,21 @@ class ModelTrain:
 
             logging.info("model has been saved successfully")
             
+            y_pred=LR.predict(X_test)
+            
+            r2_sc=r2_score(y_test,y_pred)
+            logging.info("got the r2score")
+            return r2_sc
+        
+            
+            
+            
+        
+        
+        
         except Exception as e:
-            raise CustomException(e,sys)
+            raise CustomeException(e,sys)
         
         
         
-        
-    
-# -
 
-if __name__=="__main__":
-    obj=DataIngestion()
-    train_path,test_path=obj.initiate_data_ingestion()
-    
-    dt=DataTransformation()
-    train_data,_,_=dt.initiate_data_transformation(train_path,test_path)
-    
-    mt=ModelTrain()
-    mt.train(train_data)
-    

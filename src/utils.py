@@ -16,3 +16,10 @@ def save_obj(file_path,obj):
             
     except Exception as e:
         raise CustomException(e,sys)
+        
+def load_obj(file_path):
+    try:
+        with open(file_path,'rb') as file:
+            return pickle.load(file)
+    except Exception as e:
+        raise CustomeException(e,sys)
